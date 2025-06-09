@@ -34,6 +34,32 @@ class _DetailBeritaState extends State<DetailBerita> {
               height: 250,
               fit: BoxFit.cover,
             ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Container( decoration: BoxDecoration(borderRadius: BorderRadius.circular(50),color: Colors.black), )
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Text("Pemain Realmadrid terjerat kasus skandal pencabulan pada anak di bawah umur")
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                SizedBox(width: 10,),
+                IconButton(onPressed: (){}, icon: Icon(Icons.comment),),Text("Comment"),
+                SizedBox(width: 100,),
+                IconButton(onPressed: (){}, icon: Icon(Icons.system_update_tv_outlined)),Text("Simpan"),
+                SizedBox(width: 100,),
+                IconButton(onPressed: (){}, icon: Icon(Icons.share_sharp)),Text("Share"),
+              ],
+            )
           ],
         ),
       ),
