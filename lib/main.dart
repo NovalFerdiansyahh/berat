@@ -1,3 +1,4 @@
+import 'package:berat/pages/halaman_favorit.dart';
 import 'package:berat/pages/halaman_utama.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: HalamanUtama());
+    return MaterialApp(debugShowCheckedModeBanner: false, home: HalamanFavorit());
   }
 }
