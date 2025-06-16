@@ -1,3 +1,6 @@
+import 'package:berat/pages/halaman_detail.dart';
+import 'package:berat/pages/halaman_komentar.dart';
+
 import 'package:berat/pages/halaman_favorit.dart';
 import 'package:berat/pages/halaman_utama.dart';
 import 'package:flutter/material.dart';
