@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
 
-void main(List<String> args) {
-  runApp(MaterialApp(
-    home: DetailBerita(),
-  ));
-}
-
-class DetailBerita extends StatefulWidget {
-  const DetailBerita({super.key});
+class MyWidget extends StatefulWidget {
+  const MyWidget({super.key});
 
   @override
-  State<DetailBerita> createState() => _DetailBeritaState();
+  State<MyWidget> createState() => _MyWidgetState();
 }
 
-class _DetailBeritaState extends State<DetailBerita> {
+class _MyWidgetState extends State<MyWidget> {
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -162,5 +157,8 @@ class _DetailBeritaState extends State<DetailBerita> {
         ),
       ),
     );
+
+    return const Placeholder();
+
   }
 }
