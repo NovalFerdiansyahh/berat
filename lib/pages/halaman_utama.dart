@@ -1,7 +1,8 @@
 import 'package:berat/widgets/berita_card.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
-// import 'package:http/http.dart' as http;
+import 'constanta.dart';
 
 class HalamanUtama extends StatefulWidget {
   const HalamanUtama({super.key});
@@ -25,24 +26,22 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   }
 
   Future<void> fetchBerita() async {
-    // try {
-    //   final response = await http.get(
-    //     Uri.parse('http://10.0.2.2:8080/api/home'),
-    //   );
-    //   if (response.statusCode == 200) {
-    //     final data = jsonDecode(response.body);
-    //     setState(() {
-    //       artikelTerkini = data['terkini'];
-    //       trending = data['trending'];
-    //       kategori = data['kategori'];
-    //       isLoading = false;
-    //     });
-    //   } else {
-    //     throw Exception('Gagal mengambil data');
-    //   }
-    // } catch (e) {
-    //   print("Error: $e");
-    // }
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api/berita'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          artikelTerkini = data['terkini'];
+          trending = data['trending'];
+          kategori = data['kategori'];
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Gagal mengambil data');
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
   }
 
   void onSearch(String keyword) {
@@ -70,7 +69,6 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 🔍 Search Bar
                         TextField(
                           onChanged: onSearch,
                           decoration: InputDecoration(
@@ -84,7 +82,6 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                             ),
                           ),
                         ),
-
                         SizedBox(height: 24),
                         Text(
                           "Terkini",
@@ -93,7 +90,6 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         SizedBox(height: 8),
                         SizedBox(
                           height: 160,
@@ -102,14 +98,17 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                             itemCount: filteredTerkini.length,
                             itemBuilder: (context, index) {
                               final item = filteredTerkini[index];
+                              print('Item ke-$index: $item');
                               return BeritaCard(
                                 title: item['judul'],
-                                imageUrl: item['gambar'],
+                                imageUrl:
+                                    item['gambar'] != null
+                                        ? '$baseUrl/uploads/${Uri.parse(item['gambar']).pathSegments.last}'
+                                        : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
                               );
                             },
                           ),
                         ),
-
                         SizedBox(height: 24),
                         Text(
                           "Trending",
@@ -122,7 +121,11 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                         if (trending.isNotEmpty)
                           BeritaCard(
                             title: trending[0]['judul'],
-                            imageUrl: trending[0]['gambar'],
+                            imageUrl:
+                                trending[0]['gambar'] != null &&
+                                        trending[0]['gambar'] != ''
+                                    ? '$baseUrl/uploads/${Uri.parse(trending[0]['gambar']).pathSegments.last}'
+                                    : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
                             isLarge: true,
                           ),
 
@@ -137,9 +140,13 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                         Wrap(
                           spacing: 8,
                           children:
-                              kategori.map((item) {
-                                return Chip(label: Text(item['nama_kategori']));
-                              }).toList(),
+                              kategori
+                                  .map(
+                                    (item) => Chip(
+                                      label: Text(item['nama_kategori']),
+                                    ),
+                                  )
+                                  .toList(),
                         ),
                       ],
                     ),
@@ -150,7 +157,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorit"),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Favorit"),
         ],
         currentIndex: 0,
         selectedItemColor: Colors.teal,

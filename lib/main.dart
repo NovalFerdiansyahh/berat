@@ -2,7 +2,6 @@ import 'package:berat/pages/halaman_detail.dart';
 import 'package:berat/pages/halaman_utama.dart';
 import 'package:flutter/material.dart';
 
-
 void main(List<String> args) {
   runApp(MyApp());
 }
@@ -12,6 +11,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: DetailBerita());
+    return MaterialApp(debugShowCheckedModeBanner: false, home: HalamanUtama());
   }
 }
