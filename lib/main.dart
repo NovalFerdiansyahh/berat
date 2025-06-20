@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: HalamanUtama(),
       theme: ThemeData(fontFamily: "Montserrat-Regular"),
     );
   }
