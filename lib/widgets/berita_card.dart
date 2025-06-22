@@ -36,7 +36,7 @@ class BeritaCard extends StatelessWidget {
                   (context, error, stackTrace) => Container(
                     height: isLarge ? 200 : 100,
                     color: Colors.grey,
-                    child: Icon(Icons.broken_image),
+                    // child: Icon(Icons.broken_image),
                   ),
             ),
           ),

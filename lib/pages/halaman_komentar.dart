@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-void main(List<String> args) {
+void main() {
   runApp(MaterialApp(
     home: HalamanKomentar(),
     debugShowCheckedModeBanner: false,
@@ -17,61 +17,161 @@ class HalamanKomentar extends StatefulWidget {
 class _HalamanKomentarState extends State<HalamanKomentar> {
   final TextEditingController _controller = TextEditingController();
 
-  final List<Map<String, dynamic>> komentar = [
-    {
-      "user": "User143",
-      "text": "Sangat Memalukan, saya sebagai Madridista sangat kecewa",
-      "color": Colors.red
-    },
-    {
-      "user": "Glory Hunter",
-      "text": "yang penting 15 ucl boss",
-      "color": Colors.white
-    },
-    {
-      "user": "user1",
-      "text": "wkwkwkwkwkw",
-      "color": Colors.teal
-    },
-    {
-      "user": "user223",
-      "text": "mengecewakan",
-      "color": Colors.pink
-    },
-  ];
+  List<Map<String, dynamic>> komentarList = [];
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[300],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Tombol back
-            Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.arrow_back),
-                  iconSize: 30,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
+  Widget komentar(String username, String komentar, Color warna) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 10,
+            backgroundColor: warna,
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(color: Colors.black),
                 children: [
-                   CircleAvatar(foregroundImage: NetworkImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVweX5kUAgN-_FgMV9zJQ4D39l7EEgGd59Pg&s",),),
-                   SizedBox( width:10), Text("Lorenz News",style: TextStyle(fontWeight: FontWeight.bold),),
+                  TextSpan(
+                    text: "$username\n",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                  TextSpan(
+                    text: komentar,
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ],
               ),
             ),
-          ]
-        )
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _tambahKomentar() {
+    if (_controller.text.trim().isEmpty) return;
+
+    setState(() {
+      komentarList.add({
+        "username": "Anda",
+        "komentar": _controller.text.trim(),
+        "warna": const Color.fromARGB(255, 163, 19, 19),
+      });
+      _controller.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = Color(0xffdddddd);
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8, top: 8),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.teal),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+
+    
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.red,
+                    radius: 20,
+                    child: Text("LN", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                  SizedBox(width: 10),
+                  Text("Loren News", style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+              child: Text(
+                "Terlibat Skandal Pencabulan Pada Anak? Penggawa Real Madrid Raul Ascencio Angkat Bicara.",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+
+    
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade400,
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+              ),
+              padding: EdgeInsets.all(8),
+              child: Center(
+                child: Text("Comment", style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+            Divider(height: 1, thickness: 1),
+
+
+            Expanded(
+              child: Container(
+                color: backgroundColor,
+                child: ListView.builder(
+                  itemCount: komentarList.length,
+                  itemBuilder: (context, index) {
+                    final item = komentarList[index];
+                    return komentar(item['username'], item['komentar'], item['warna']);
+                  },
+                ),
+              ),
+            ),
+
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              color: backgroundColor,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: "Comment",
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(color: Colors.teal.shade100),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(color: Colors.teal.shade100),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  IconButton(
+                    onPressed: _tambahKomentar,
+                    icon: Icon(Icons.send),
+                    color: Colors.teal,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
