@@ -2,6 +2,7 @@ import 'package:berat/pages/halaman_detail.dart';
 import 'package:berat/pages/halaman_komentar.dart';
 
 import 'package:berat/pages/halaman_favorit.dart';
+import 'package:berat/pages/halaman_login.dart';
 import 'package:berat/pages/halaman_utama.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: HalamanDetail());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HalamanUtama(),
+      theme: ThemeData(fontFamily: "Montserrat-Regular"),
+    );
   }
 }
