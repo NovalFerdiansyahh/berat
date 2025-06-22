@@ -1,3 +1,4 @@
+import 'package:berat/pages/halaman_post.dart';
 import 'package:flutter/material.dart';
 import 'halaman_utama_content.dart';
 import 'halaman_profil.dart';
@@ -40,7 +41,12 @@ class _HalamanUtamaState extends State<HalamanUtama> {
         selectedItemColor: Colors.teal,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HalamanPostArtikel()),
+          );
+        },
         backgroundColor: Colors.teal,
         child: Icon(Icons.add),
       ),

@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main(List<String> args) {
-  runApp(MaterialApp(
-    home: HalamanKomentar(),
-    debugShowCheckedModeBanner: false,
-  ));
-}
-
 class HalamanKomentar extends StatefulWidget {
   const HalamanKomentar({super.key});
 
@@ -21,23 +14,15 @@ class _HalamanKomentarState extends State<HalamanKomentar> {
     {
       "user": "User143",
       "text": "Sangat Memalukan, saya sebagai Madridista sangat kecewa",
-      "color": Colors.red
+      "color": Colors.red,
     },
     {
       "user": "Glory Hunter",
       "text": "yang penting 15 ucl boss",
-      "color": Colors.white
+      "color": Colors.white,
     },
-    {
-      "user": "user1",
-      "text": "wkwkwkwkwkw",
-      "color": Colors.teal
-    },
-    {
-      "user": "user223",
-      "text": "mengecewakan",
-      "color": Colors.pink
-    },
+    {"user": "user1", "text": "wkwkwkwkwkw", "color": Colors.teal},
+    {"user": "user223", "text": "mengecewakan", "color": Colors.pink},
   ];
 
   @override
@@ -65,13 +50,21 @@ class _HalamanKomentarState extends State<HalamanKomentar> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                   CircleAvatar(foregroundImage: NetworkImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVweX5kUAgN-_FgMV9zJQ4D39l7EEgGd59Pg&s",),),
-                   SizedBox( width:10), Text("Lorenz News",style: TextStyle(fontWeight: FontWeight.bold),),
+                  CircleAvatar(
+                    foregroundImage: NetworkImage(
+                      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVweX5kUAgN-_FgMV9zJQ4D39l7EEgGd59Pg&s",
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    "Lorenz News",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ),
-          ]
-        )
+          ],
+        ),
       ),
     );
   }

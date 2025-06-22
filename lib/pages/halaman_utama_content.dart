@@ -63,20 +63,6 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  onChanged: onSearch,
-                  decoration: InputDecoration(
-                    hintText: 'Search Here',
-                    prefixIcon: Icon(Icons.search),
-                    filled: true,
-                    fillColor: Colors.grey[300],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24),
                 Text(
                   "Terkini",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
