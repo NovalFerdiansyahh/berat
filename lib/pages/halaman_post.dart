@@ -94,7 +94,7 @@ class _HalamanPostArtikelState extends State<HalamanPostArtikel> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Artikel berhasil diposting!')));
-        Navigator.pop(context); // kembali setelah sukses
+        Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(
           context,

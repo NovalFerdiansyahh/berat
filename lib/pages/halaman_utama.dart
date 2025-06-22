@@ -35,9 +35,11 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
           BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Favorit"),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Cari"),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.teal,
       ),
       floatingActionButton: FloatingActionButton(
