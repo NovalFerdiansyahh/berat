@@ -1,11 +1,9 @@
-import 'package:berat/pages/halaman_komentar.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
-void main(List<String> args) {
-  runApp(MaterialApp(
-    home: HalamanDetail(),
-  ));
-}
+import 'package:http/http.dart' as http;
+import 'artikel_model.dart';
+import 'constanta.dart';
+import 'halaman_komentar.dart';
 
 class HalamanDetail extends StatefulWidget {
   const HalamanDetail({super.key});
@@ -15,191 +13,183 @@ class HalamanDetail extends StatefulWidget {
 }
 
 class _HalamanDetailState extends State<HalamanDetail> {
+  Artikel? artikel;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchArtikel();
+  }
+
+  Future<void> fetchArtikel() async {
+    final response = await http.get(Uri.parse('$baseUrl/api/artikel'));
+    if (response.statusCode == 200) {
+      final List data = json.decode(response.body);
+      setState(() {
+        artikel = Artikel.fromJson(data.first);
+        isLoading = false;
+      });
+    } else {
+      throw Exception("Gagal memuat artikel");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-              child: IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.arrow_back),
-                iconSize: 30,color: Colors.teal[200],
-              ),
-            ),
-            
-            Image.network(
-              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVweX5kUAgN-_FgMV9zJQ4D39l7EEgGd59Pg&s",
-              width: MediaQuery.of(context).size.width,
-              height: 250,
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Container(
-                    height: 10,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50),
+        child: isLoading || artikel == null
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(Icons.arrow_back, color: Colors.teal[200], size: 30),
+                      ),
                     ),
-                  )
-                ],
-              ),
-            ),
-
-
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    foregroundImage: NetworkImage(
-                      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVweX5kUAgN-_FgMV9zJQ4D39l7EEgGd59Pg&s",
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    "Lorenz News",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-
-
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-               children: [
-                    SizedBox(width: 10),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => HalamanKomentar()),
-                        );
-                      },
-                      icon: Icon(Icons.comment),
-                    ),
-                    Text("Comment"),
-                    SizedBox(width: 100),
-                  IconButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Berita telah disimpan"),
-                            duration: Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
+                    artikel!.gambar != null
+                        ? Image.network(
+                            artikel!.gambar!,
+                            width: MediaQuery.of(context).size.width,
+                            height: 250,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            height: 250,
+                            width: double.infinity,
+                            color: Colors.grey[300],
+                            child: Icon(Icons.image, size: 100),
                           ),
-                        );
-                      },
-                      icon: Icon(Icons.bookmark),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.grey,
+                            child: Text(artikel!.sumber[0]),
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            artikel!.sumber,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
-                    Text("Simpan"),
-                  SizedBox(width: 100),
-                  IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text(
-                              "Salin tautan di bawah untuk membagikan berita ini",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            icon: IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.copy),
-                            ),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => HalamanKomentar()),
+                              );
+                            },
+                            icon: Icon(Icons.comment),
+                          ),
+                          Text("Comment"),
+                          SizedBox(width: 50),
+                          IconButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Berita telah disimpan"),
+                                  duration: Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.bookmark),
+                          ),
+                          Text("Simpan"),
+                          SizedBox(width: 50),
+                          IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text(
+                                    "Salin tautan di bawah untuk membagikan berita ini",
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Column(
-                                        children: [
-                                          IconButton(
-                                            onPressed: () {
-                                            },
-                                            icon: Image.network(
-                                              "https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png",
-                                              width: 40,
-                                              height: 40,
-                                            ),
-                                            iconSize: 40,
-                                          ),
-                                          SizedBox(height: 5),
-                                          Text("WhatsApp",
-                                              style: TextStyle(fontSize: 12)),
-                                        ],
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.copy),
                                       ),
-                                      Column(
+                                      SizedBox(height: 10),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          IconButton(
-                                            onPressed: () {
-                                            },
-                                            icon: Image.network(
-                                              "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/960px-Facebook_f_logo_%282019%29.svg.png",
-                                              width: 40,
-                                              height: 40,
-                                            ),
-                                            iconSize: 40,
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {},
+                                                icon: Image.network(
+                                                  "https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png",
+                                                  width: 40,
+                                                  height: 40,
+                                                ),
+                                              ),
+                                              Text("WhatsApp", style: TextStyle(fontSize: 12))
+                                            ],
                                           ),
-                                          SizedBox(height: 5),
-                                          Text("Facebook",
-                                              style: TextStyle(fontSize: 12)),
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {},
+                                                icon: Image.network(
+                                                  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/960px-Facebook_f_logo_%282019%29.svg.png",
+                                                  width: 40,
+                                                  height: 40,
+                                                ),
+                                              ),
+                                              Text("Facebook", style: TextStyle(fontSize: 12))
+                                            ],
+                                          )
                                         ],
-                                      ),
+                                      )
                                     ],
                                   ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text("Tutup"),
+                                    )
+                                  ],
                                 ),
-                              ],
-                            ),
-                            actions: [
-                              TextButton(
-                                child: Text("Tutup"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    icon: Icon(Icons.share_sharp),
-                  ),
-                  Text("Share"),
-                ],
+                              );
+                            },
+                            icon: Icon(Icons.share_sharp),
+                          ),
+                          Text("Share"),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        artikel!.judul,
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(artikel!.isi),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "Apa yang akan terjadi",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("Artikel..."),
-            ),
-          ],
-        ),
       ),
     );
   }
