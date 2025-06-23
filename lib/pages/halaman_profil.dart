@@ -3,16 +3,17 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'constanta.dart';
 import '../models/user_model.dart';
+import 'halaman_ubah_profil.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   Future<UserModel> fetchUserData() async {
-    final response = await http.get(Uri.parse('${baseUrl}user'));
+    final response = await http.get(Uri.parse('$baseUrl/api/user'));
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return UserModel.fromJson(data['data']);
+      final List<dynamic> data = json.decode(response.body);
+      return UserModel.fromJson(data[0]);
     } else {
       throw Exception('Gagal mengambil data pengguna');
     }
@@ -23,7 +24,9 @@ class ProfilePage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           contentPadding: EdgeInsets.all(20),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -40,7 +43,6 @@ class ProfilePage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      // Tambahkan aksi log out sesungguhnya di sini
                     },
                     child: Text('Ya'),
                     style: ElevatedButton.styleFrom(
@@ -82,12 +84,6 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.teal),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
         centerTitle: true,
         title: Text(
           'Profil',
@@ -116,13 +112,13 @@ class ProfilePage extends StatelessWidget {
                 ),
                 SizedBox(height: 12),
                 Text(
-                  user.name,
+                  user.nama,
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 SizedBox(height: 24),
-                InfoRow(label: 'Tanggal Lahir', value: user.birthDate),
+                InfoRow(label: 'Tanggal Lahir', value: user.tanggalLahir),
                 Divider(),
-                InfoRow(label: 'Nomor HP', value: user.phone),
+                InfoRow(label: 'Nomor HP', value: user.noTelepon),
                 Divider(),
                 InfoRow(label: 'Email', value: user.email),
                 Divider(),
@@ -131,7 +127,7 @@ class ProfilePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Pengguna sebagai Pembaca',
+                      'Pengguna sebagai ${user.role}',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     GestureDetector(
@@ -142,7 +138,14 @@ class ProfilePage extends StatelessWidget {
                 ),
                 SizedBox(height: 36),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditProfilePage(),
+                      ),
+                    );
+                  },
                   child: Text('Ubah Profil'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal[200],
@@ -175,9 +178,15 @@ class InfoRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400)),
+          Text(
+            label,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+          ),
           SizedBox(height: 4),
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            value,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
           SizedBox(height: 12),
         ],
       ),
