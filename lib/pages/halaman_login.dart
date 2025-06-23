@@ -41,9 +41,9 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         if (user != null) {
-          // Simpan id_user ke SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('idUser', user['id_user'].toString());
+          await prefs.setString('role', user['role'].toString());
 
           Navigator.pushReplacement(
             context,
