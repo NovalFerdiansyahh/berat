@@ -78,7 +78,7 @@ class _HalamanKomentarState extends State<HalamanKomentar> {
             Padding(
               padding: const EdgeInsets.only(left: 8, top: 8),
               child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.teal),
+                icon: Icon(Icons.arrow_back, color: Colors.teal,size: 30,),
                 onPressed: () {
                   Navigator.pop(context);
                 },
