@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: HalamanKomentar(),
-    debugShowCheckedModeBanner: false,
-  ));
-}
-
 class HalamanKomentar extends StatefulWidget {
-  const HalamanKomentar({super.key});
+  final int idArtikel;
+
+  const HalamanKomentar({super.key, required this.idArtikel});
 
   @override
   State<HalamanKomentar> createState() => _HalamanKomentarState();
 }
+
 
 class _HalamanKomentarState extends State<HalamanKomentar> {
   final TextEditingController _controller = TextEditingController();
