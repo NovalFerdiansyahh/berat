@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'constanta.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -13,6 +16,58 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController confirmPasswordController = TextEditingController();
 
   String selectedRole = 'Penulis';
+  bool isLoading = false;
+
+  Future<void> registerUser() async {
+    final username = usernameController.text;
+    final email = emailController.text;
+    final phone = phoneController.text;
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+    final role = selectedRole.toLowerCase();
+
+    if ([username, email, phone, password, confirmPassword].any((e) => e.isEmpty)) {
+      showSnackBar('Semua field wajib diisi');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      showSnackBar('Password tidak sama');
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/user/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'nama': username,
+          'email': email,
+          'no_telepon': phone,
+          'password': password,
+          'role': role,
+        }),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        showSnackBar('Registrasi berhasil! Silakan login');
+        Navigator.pop(context); // Kembali ke halaman login
+      } else {
+        print('Gagal daftar: ${response.body}');
+        showSnackBar('Gagal daftar. Coba lagi.');
+      }
+    } catch (e) {
+      showSnackBar('Terjadi kesalahan: $e');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +77,6 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
             Text(
               'BERAT',
               style: TextStyle(
@@ -32,28 +86,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 letterSpacing: 2,
               ),
             ),
-            Text(
-              'Berita Terakurat',
-              style: TextStyle(fontSize: 14, color: Colors.teal[200]),
-            ),
+            Text('Berita Terakurat', style: TextStyle(fontSize: 14, color: Colors.teal[200])),
             const SizedBox(height: 40),
 
-
             Align(alignment: Alignment.centerLeft, child: Text("Username")),
-            TextField(
-              controller: usernameController,
-              decoration: InputDecoration(hintText: 'Sigma'),
-            ),
+            TextField(controller: usernameController, decoration: InputDecoration(hintText: 'Sigma')),
             const SizedBox(height: 10),
-
 
             Align(alignment: Alignment.centerLeft, child: Text("Email")),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(hintText: 'Sigma@gmail.com'),
-            ),
+            TextField(controller: emailController, decoration: InputDecoration(hintText: 'Sigma@gmail.com')),
             const SizedBox(height: 10),
-
 
             Align(alignment: Alignment.centerLeft, child: Text("Telepon")),
             TextField(
@@ -63,7 +105,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 10),
 
-
             Align(alignment: Alignment.centerLeft, child: Text("Password")),
             TextField(
               controller: passwordController,
@@ -71,7 +112,6 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: InputDecoration(hintText: '********'),
             ),
             const SizedBox(height: 10),
-
 
             Align(alignment: Alignment.centerLeft, child: Text("Confirmation password")),
             TextField(
@@ -81,50 +121,30 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 20),
 
-
             Align(alignment: Alignment.centerLeft, child: Text("Daftar sebagai")),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Radio<String>(
-                      value: 'Penulis',
-                      groupValue: selectedRole,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedRole = value!;
-                        });
-                      },
-                    ),
-                    const Text("Penulis"),
-                  ],
+                Radio<String>(
+                  value: 'Penulis',
+                  groupValue: selectedRole,
+                  onChanged: (value) => setState(() => selectedRole = value!),
                 ),
-                Row(
-                  children: [
-                    Radio<String>(
-                      value: 'Pembaca',
-                      groupValue: selectedRole,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedRole = value!;
-                        });
-                      },
-                    ),
-                    const Text("Pembaca"),
-                  ],
+                const Text("Penulis"),
+                Radio<String>(
+                  value: 'Pembaca',
+                  groupValue: selectedRole,
+                  onChanged: (value) => setState(() => selectedRole = value!),
                 ),
+                const Text("Pembaca"),
               ],
             ),
             const SizedBox(height: 20),
 
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-
-                },
+                onPressed: isLoading ? null : registerUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal[200],
                   shape: RoundedRectangleBorder(
@@ -132,21 +152,20 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text("Daftar"),
+                child: isLoading
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : const Text("Daftar"),
               ),
             ),
 
             const SizedBox(height: 20),
-
 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text("Sudah punya akun? "),
                 GestureDetector(
-                  onTap: () {
-
-                  },
+                  onTap: () => Navigator.pop(context),
                   child: const Text(
                     "Login",
                     style: TextStyle(
