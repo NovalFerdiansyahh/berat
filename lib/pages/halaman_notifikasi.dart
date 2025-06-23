@@ -1,62 +1,70 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'constanta.dart';
 
-class NotifikasiPage extends StatelessWidget {
-  final List<Map<String, dynamic>> notifikasiList;
+class NotifikasiPage extends StatefulWidget {
+  final String idUser;
+  const NotifikasiPage({Key? key, required this.idUser}) : super(key: key);
 
-  const NotifikasiPage({Key? key, required this.notifikasiList})
-    : super(key: key);
+  @override
+  State<NotifikasiPage> createState() => _NotifikasiPageState();
+}
+
+class _NotifikasiPageState extends State<NotifikasiPage> {
+  List<dynamic> notifikasi = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchNotifikasi();
+  }
+
+  Future<void> fetchNotifikasi() async {
+    final url = Uri.parse('$baseUrl${widget.idUser}');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      setState(() {
+        notifikasi = jsonDecode(response.body);
+        loading = false;
+      });
+    } else {
+      setState(() => loading = false);
+      print('Gagal memuat notifikasi');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Notifikasi')),
       body:
-          notifikasiList.isEmpty
-              ? Center(child: Text('Tidak ada notifikasi.'))
+          loading
+              ? Center(child: CircularProgressIndicator())
               : ListView.builder(
-                itemCount: notifikasiList.length,
+                itemCount: notifikasi.length,
                 itemBuilder: (context, index) {
-                  final notif = notifikasiList[index];
-                  final DateTime waktu = DateTime.parse(
-                    notif['created_at']['date'],
-                  );
-                  final bool sudahDibaca = notif['dibaca'] == "1";
+                  final item = notifikasi[index];
+                  final waktu = DateTime.parse(item['created_at']['date']);
+                  final sudahDibaca = item['dibaca'] == '1';
 
                   return ListTile(
                     leading: Icon(
                       sudahDibaca
-                          ? Icons.notifications_none
-                          : Icons.notifications_active,
-                      color: sudahDibaca ? Colors.grey : Colors.blue,
+                          ? Icons.mark_email_read
+                          : Icons.mark_email_unread,
+                      color: sudahDibaca ? Colors.grey : Colors.redAccent,
                     ),
                     title: Text(
-                      notif['judul'],
+                      item['judul'],
                       style: TextStyle(
                         fontWeight:
                             sudahDibaca ? FontWeight.normal : FontWeight.bold,
                       ),
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(notif['pesan']),
-                        SizedBox(height: 4),
-                        Text(
-                          '${waktu.day}-${waktu.month}-${waktu.year} ${waktu.hour}:${waktu.minute.toString().padLeft(2, '0')}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      // Tambahkan aksi jika ingin tandai sebagai dibaca atau buka artikel
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Notifikasi "${notif['judul']}" diklik',
-                          ),
-                        ),
-                      );
-                    },
+                    subtitle: Text(item['pesan']),
+                    trailing: Text("${waktu.day}/${waktu.month}/${waktu.year}"),
                   );
                 },
               ),
