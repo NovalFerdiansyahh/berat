@@ -1,3 +1,4 @@
+import 'package:berat/pages/halaman_pencarian.dart';
 import 'package:berat/pages/halaman_post.dart';
 import 'package:flutter/material.dart';
 import 'halaman_utama_content.dart';
@@ -16,8 +17,9 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   final List<Widget> _pages = [
     HalamanUtamaContent(),
-    ProfilePage(),
+    HalamanPencarian(),
     HalamanFavorit(),
+    ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
@@ -33,24 +35,14 @@ class _HalamanUtamaState extends State<HalamanUtama> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Favorit"),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: "Cari"),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Favorit"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.teal,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => HalamanPostArtikel()),
-          );
-        },
-        backgroundColor: Colors.teal,
-        child: Icon(Icons.add),
       ),
     );
   }
