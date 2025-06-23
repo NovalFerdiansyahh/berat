@@ -16,40 +16,71 @@ class _HalamanPostArtikelState extends State<HalamanPostArtikel> {
   final TextEditingController _judulController = TextEditingController();
   final TextEditingController _artikelController = TextEditingController();
   String? _selectedKategori;
+  String? idUser;
 
-  List<String> kategoriList = [];
+  List<Map<String, dynamic>> kategoriListMap = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     fetchKategori();
+    fetchUserId();
   }
 
   Future<void> fetchKategori() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/api/kategori'));
-      print("Response: ${response.statusCode}");
-      print("Body: ${response.body}");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-
         setState(() {
-          kategoriList =
-              data
-                  .map<String>((item) => item['nama_kategori'].toString())
-                  .toList();
+          kategoriListMap =
+              data.map<Map<String, dynamic>>((item) {
+                return {
+                  'id': item['id_kategori'].toString(),
+                  'nama': item['nama_kategori'],
+                };
+              }).toList();
           isLoading = false;
         });
       } else {
-        throw Exception('Gagal mengambil data');
+        throw Exception('Gagal mengambil data kategori');
       }
     } catch (e) {
       print("Error: $e");
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> fetchUserId() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api/user'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> users = jsonDecode(response.body);
+
+        // Cari user dengan role penulis
+        final penulis = users.firstWhere(
+          (user) => user['role'] == 'penulis',
+          orElse: () => null,
+        );
+
+        if (penulis != null) {
+          setState(() {
+            idUser = penulis['id_user'].toString();
+          });
+          print('ID User Penulis: $idUser');
+        } else {
+          print('Tidak ada user dengan role penulis');
+        }
+      } else {
+        print('Gagal ambil user. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
@@ -80,22 +111,38 @@ class _HalamanPostArtikelState extends State<HalamanPostArtikel> {
     final request = http.MultipartRequest('POST', uri);
 
     request.fields['judul'] = judul;
-    request.fields['kategori'] = _selectedKategori!;
+    request.fields['id_kategori'] = _selectedKategori!;
     request.fields['isi'] = isi;
+
+    if (idUser != null) {
+      request.fields['id_user'] = idUser!;
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('ID User tidak ditemukan')));
+      return;
+    }
 
     request.files.add(
       await http.MultipartFile.fromPath('gambar', _image!.path),
     );
 
     try {
+      print("KATEGORI DIPILIH: $_selectedKategori");
+      print("Fields:");
+      request.fields.forEach((key, value) => print("$key: $value"));
+
       final response = await request.send();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Artikel berhasil diposting!')));
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       } else {
+        print("Gagal: Status ${response.statusCode}");
+        final resStr = await response.stream.bytesToString();
+        print("Response body: $resStr");
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Gagal posting artikel')));
@@ -174,15 +221,18 @@ class _HalamanPostArtikelState extends State<HalamanPostArtikel> {
                         value: _selectedKategori,
                         hint: Text("Pilih Kategori"),
                         items:
-                            kategoriList.map((kategori) {
+                            kategoriListMap.map((kategori) {
                               return DropdownMenuItem<String>(
-                                value: kategori,
-                                child: Text(kategori),
+                                value: kategori['id'], // ini adalah id_kategori
+                                child: Text(
+                                  kategori['nama'],
+                                ), // ini yang ditampilkan
                               );
                             }).toList(),
                         onChanged: (value) {
                           setState(() {
-                            _selectedKategori = value;
+                            _selectedKategori =
+                                value; // value berisi id_kategori
                           });
                         },
                         decoration: InputDecoration(
@@ -194,6 +244,7 @@ class _HalamanPostArtikelState extends State<HalamanPostArtikel> {
                           ),
                         ),
                       ),
+
                       SizedBox(height: 16),
                       TextField(
                         controller: _artikelController,
