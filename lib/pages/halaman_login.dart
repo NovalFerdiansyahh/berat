@@ -3,6 +3,7 @@ import 'package:berat/pages/halaman_register.dart';
 import 'package:berat/pages/halaman_utama.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'constanta.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,49 +19,48 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
 
   Future<void> loginUser() async {
-  final email = emailController.text;
-  final password = passwordController.text;
+    final email = emailController.text;
+    final password = passwordController.text;
 
-  if (email.isEmpty || password.isEmpty) {
-    showSnackBar('Email dan password harus diisi');
-    return;
-  }
-
-  setState(() => isLoading = true);
-
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/api/user'));
-
-    print('Status Code: ${response.statusCode}');
-    print('Response Body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final List users = jsonDecode(response.body);
-
-      final user = users.firstWhere(
-        (u) => u['email'] == email && u['password'] == password,
-        orElse: () => null,
-      );
-
-      if (user != null) {
-        Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (context) => HalamanUtama()),
-);
-
-      } else {
-        showSnackBar('Email atau password salah');
-      }
-    } else {
-      showSnackBar('Gagal mengambil data dari server');
+    if (email.isEmpty || password.isEmpty) {
+      showSnackBar('Email dan password harus diisi');
+      return;
     }
-  } catch (e) {
-    showSnackBar('Terjadi kesalahan: $e');
-  } finally {
-    setState(() => isLoading = false);
-  }
-}
 
+    setState(() => isLoading = true);
+
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api/user'));
+
+      if (response.statusCode == 200) {
+        final List users = jsonDecode(response.body);
+
+        final user = users.firstWhere(
+          (u) => u['email'] == email && u['password'] == password,
+          orElse: () => null,
+        );
+
+        if (user != null) {
+          // Simpan id_user ke SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('idUser', user['id_user'].toString());
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HalamanUtama()),
+          );
+        } else {
+          showSnackBar('Email atau password salah');
+        }
+      } else {
+        showSnackBar('Gagal mengambil data dari server');
+      }
+    } catch (e) {
+      showSnackBar('Terjadi kesalahan: $e');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
   void showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
@@ -108,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                 TextField(
                   controller: passwordController,
                   obscureText: true,
-                  decoration: InputDecoration(hintText: '********'),
+                  decoration: InputDecoration(hintText: ''),
                 ),
                 const SizedBox(height: 30),
 
@@ -137,7 +137,10 @@ class _LoginPageState extends State<LoginPage> {
                     const Text("Belum punya akun? "),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterPage()),
+                        );
                       },
                       child: const Text(
                         "Daftar",
