@@ -1,3 +1,4 @@
+import 'package:berat/pages/halaman_notifikasi.dart';
 import 'package:berat/pages/halaman_pencarian.dart';
 import 'package:berat/pages/halaman_post.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   final List<Widget> _pages = [
     HalamanUtamaContent(),
+    NotifikasiPage(notifikasiList: []),
     HalamanPencarian(),
     HalamanFavorit(),
     ProfilePage(),
@@ -35,6 +37,10 @@ class _HalamanUtamaState extends State<HalamanUtama> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: "Notifikasi",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: "Cari"),
           BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Favorit"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),

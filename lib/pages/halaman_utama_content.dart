@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:berat/pages/halaman_detail.dart';
 import 'package:berat/widgets/berita_card.dart';
 import 'package:flutter/material.dart';
@@ -120,50 +118,34 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
                   ),
                   SizedBox(height: 8),
                   if (trending.isNotEmpty)
-                    SizedBox(
-                      height:
-                          250, // tinggi item BeritaCard (ubah sesuai kebutuhan)
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: min(
-                          5,
-                          trending.length,
-                        ), // batasi maksimum 5 item
-                        itemBuilder: (context, index) {
-                          final item = trending[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: GestureDetector(
-                              onTap: () {},
-                              child: BeritaCard(
-                                title: item['judul'],
-                                imageUrl:
-                                    item['gambar'] != null &&
-                                            item['gambar'] != ''
-                                        ? '$baseUrl/uploads/${Uri.parse(item['gambar']).pathSegments.last}'
-                                        : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
-                                isLarge: true,
-                              ),
-                            ),
-                          );
-                        },
+                    GestureDetector(
+                      onTap: () {},
+                      child: BeritaCard(
+                        title: trending[0]['judul'],
+                        imageUrl:
+                            trending[0]['gambar'] != null &&
+                                    trending[0]['gambar'] != ''
+                                ? '$baseUrl/uploads/${Uri.parse(trending[0]['gambar']).pathSegments.last}'
+                                : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
+                        isLarge: true,
                       ),
                     ),
-
                   SizedBox(height: 24),
                   Text(
                     "Kategori",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  Wrap(
-                    spacing: 8,
-                    children:
-                        kategori
-                            .map(
-                              (item) =>
-                                  Chip(label: Text(item['nama_kategori'])),
-                            )
-                            .toList(),
+                  GestureDetector(
+                    child: Wrap(
+                      spacing: 8,
+                      children:
+                          kategori
+                              .map(
+                                (item) =>
+                                    Chip(label: Text(item['nama_kategori'])),
+                              )
+                              .toList(),
+                    ),
                   ),
                 ],
               ),
