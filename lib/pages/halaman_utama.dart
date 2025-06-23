@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'halaman_utama_content.dart';
 import 'halaman_profil.dart';
 import 'halaman_favorit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HalamanUtama extends StatefulWidget {
   const HalamanUtama({super.key});
@@ -15,14 +16,22 @@ class HalamanUtama extends StatefulWidget {
 
 class _HalamanUtamaState extends State<HalamanUtama> {
   int _selectedIndex = 0;
+  String? userId;
+  bool isLoading = true;
 
-  final List<Widget> _pages = [
-    HalamanUtamaContent(),
-    NotifikasiPage(notifikasiList: []),
-    HalamanPencarian(),
-    HalamanFavorit(),
-    ProfilePage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    loadUserId();
+  }
+
+  Future<void> loadUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString('userId');
+      isLoading = false;
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -32,6 +41,18 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final List<Widget> _pages = [
+      HalamanUtamaContent(),
+      NotifikasiPage(idUser: userId ?? ''), // Pastikan idUser tidak null
+      HalamanPencarian(),
+      HalamanFavorit(),
+      ProfilePage(),
+    ];
+
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
