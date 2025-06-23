@@ -111,7 +111,7 @@ class _HalamanPostArtikelState extends State<HalamanPostArtikel> {
     final request = http.MultipartRequest('POST', uri);
 
     request.fields['judul'] = judul;
-    request.fields['id_kategori'] = _selectedKategori!;
+    request.fields['id_kategori'] = _selectedKategori!.toString();
     request.fields['isi'] = isi;
 
     if (idUser != null) {

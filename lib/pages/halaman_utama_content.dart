@@ -43,6 +43,19 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
     }
   }
 
+  void tambahView(int idArtikel) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/artikel/tambahDilihat/$idArtikel'),
+    );
+
+    if (response.statusCode == 200) {
+      print('View ditambah');
+    } else {
+      print('Gagal menambah view: ${response.statusCode}');
+      print(response.body);
+    }
+  }
+
   void onSearch(String keyword) {
     setState(() {
       searchKeyword = keyword.toLowerCase();
@@ -84,6 +97,7 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
                           final item = filteredTerkini[index];
                           return GestureDetector(
                             onTap: () {
+                              tambahView(int.parse(item['id_artikel']));
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
