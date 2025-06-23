@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:berat/pages/halaman_detail.dart';
 import 'package:berat/widgets/berita_card.dart';
 import 'package:flutter/material.dart';
@@ -42,23 +44,19 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
     }
   }
 
-  void tambahView(int idArtikel) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/artikel/tambahDilihat/$idArtikel'),
-    );
-
-    if (response.statusCode == 200) {
-      print('View ditambah');
-    } else {
-      print('Gagal menambah view: ${response.statusCode}');
-      print(response.body);
+  Future<void> tambahDilihat(int idArtikel) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/artikel/tambahDilihat/$idArtikel'),
+      );
+      if (response.statusCode == 200) {
+        print('Dilihat +1 untuk artikel $idArtikel');
+      } else {
+        print('Gagal menambah dilihat: ${response.body}');
+      }
+    } catch (e) {
+      print("Error saat tambah dilihat: $e");
     }
-  }
-
-  void onSearch(String keyword) {
-    setState(() {
-      searchKeyword = keyword.toLowerCase();
-    });
   }
 
   @override
@@ -90,13 +88,16 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
                       itemCount: filteredTerkini.length,
                       itemBuilder: (context, index) {
                         final item = filteredTerkini[index];
+                        final id =
+                            int.tryParse(item['id_artikel'].toString()) ?? 0;
                         return GestureDetector(
-                          onTap: () {
-                            final id = int.tryParse(item['id_artikel'].toString()) ?? 0;
+                          onTap: () async {
+                            await tambahDilihat(id);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => HalamanDetail(idArtikel: id),
+                                builder:
+                                    (context) => HalamanDetail(idArtikel: id),
                               ),
                             );
                           },
@@ -111,36 +112,6 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
                         );
                       },
                     ),
-<<<<<<< HEAD
-                    SizedBox(height: 8),
-                    SizedBox(
-                      height: 160,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: filteredTerkini.length,
-                        itemBuilder: (context, index) {
-                          final item = filteredTerkini[index];
-                          return GestureDetector(
-                            onTap: () {
-                              tambahView(int.parse(item['id_artikel']));
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => HalamanDetail(),
-                                ),
-                              );
-                            },
-                            child: BeritaCard(
-                              title: item['judul'],
-                              imageUrl:
-                                  item['gambar'] != null
-                                      ? '$baseUrl/uploads/${Uri.parse(item['gambar']).pathSegments.last}'
-                                      : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
-                            ),
-                          );
-                        },
-                      ),
-=======
                   ),
                   SizedBox(height: 24),
                   Text(
@@ -149,16 +120,36 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
                   ),
                   SizedBox(height: 8),
                   if (trending.isNotEmpty)
-                    BeritaCard(
-                      title: trending[0]['judul'],
-                      imageUrl:
-                          trending[0]['gambar'] != null &&
-                                  trending[0]['gambar'] != ''
-                              ? '$baseUrl/uploads/${Uri.parse(trending[0]['gambar']).pathSegments.last}'
-                              : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
-                      isLarge: true,
->>>>>>> 11bc3ac04bf6a2985174bf3c58566e25bb7a155d
+                    SizedBox(
+                      height:
+                          250, // tinggi item BeritaCard (ubah sesuai kebutuhan)
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: min(
+                          5,
+                          trending.length,
+                        ), // batasi maksimum 5 item
+                        itemBuilder: (context, index) {
+                          final item = trending[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: GestureDetector(
+                              onTap: () {},
+                              child: BeritaCard(
+                                title: item['judul'],
+                                imageUrl:
+                                    item['gambar'] != null &&
+                                            item['gambar'] != ''
+                                        ? '$baseUrl/uploads/${Uri.parse(item['gambar']).pathSegments.last}'
+                                        : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
+                                isLarge: true,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
+
                   SizedBox(height: 24),
                   Text(
                     "Kategori",
