@@ -1,7 +1,9 @@
 import 'package:berat/pages/halaman_detail.dart';
+import 'package:berat/pages/halaman_post.dart';
 import 'package:berat/widgets/berita_card.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'constanta.dart';
 
@@ -17,10 +19,25 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
   String searchKeyword = '';
   bool isLoading = true;
 
+  String? userId;
+  String? role;
+  bool isUserLoaded = false;
+
   @override
   void initState() {
     super.initState();
     fetchBerita();
+    loadUserInfo();
+  }
+
+  Future<void> loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString('idUser');
+      role = prefs.getString('role');
+      isUserLoaded = true;
+    });
+    print("Role user: $role");
   }
 
   Future<void> fetchBerita() async {
@@ -65,92 +82,121 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
           return title.contains(searchKeyword);
         }).toList();
 
-    return isLoading
-        ? Center(child: CircularProgressIndicator())
-        : SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Terkini",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  SizedBox(
-                    height: 160,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: filteredTerkini.length,
-                      itemBuilder: (context, index) {
-                        final item = filteredTerkini[index];
-                        final id =
-                            int.tryParse(item['id_artikel'].toString()) ?? 0;
-                        return GestureDetector(
-                          onTap: () async {
-                            await tambahDilihat(id);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => HalamanDetail(idArtikel: id),
-                              ),
-                            );
-                          },
-
-                          child: BeritaCard(
-                            title: item['judul'],
-                            imageUrl:
-                                item['gambar'] != null
-                                    ? '$baseUrl/uploads/${Uri.parse(item['gambar']).pathSegments.last}'
-                                    : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
+    return Scaffold(
+      body:
+          isLoading
+              ? Center(child: CircularProgressIndicator())
+              : SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Terkini",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
-                        );
-                      },
+                        ),
+                        SizedBox(height: 8),
+                        SizedBox(
+                          height: 160,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: filteredTerkini.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredTerkini[index];
+                              final id =
+                                  int.tryParse(item['id_artikel'].toString()) ??
+                                  0;
+                              return GestureDetector(
+                                onTap: () async {
+                                  await tambahDilihat(id);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) =>
+                                              HalamanDetail(idArtikel: id),
+                                    ),
+                                  );
+                                },
+                                child: BeritaCard(
+                                  title: item['judul'],
+                                  imageUrl:
+                                      item['gambar'] != null
+                                          ? '$baseUrl/uploads/${Uri.parse(item['gambar']).pathSegments.last}'
+                                          : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        Text(
+                          "Trending",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        if (trending.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {},
+                            child: BeritaCard(
+                              title: trending[0]['judul'],
+                              imageUrl:
+                                  trending[0]['gambar'] != null &&
+                                          trending[0]['gambar'] != ''
+                                      ? '$baseUrl/uploads/${Uri.parse(trending[0]['gambar']).pathSegments.last}'
+                                      : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
+                              isLarge: true,
+                            ),
+                          ),
+                        SizedBox(height: 24),
+                        Text(
+                          "Kategori",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        GestureDetector(
+                          child: Wrap(
+                            spacing: 8,
+                            children:
+                                kategori
+                                    .map(
+                                      (item) => Chip(
+                                        label: Text(item['nama_kategori']),
+                                      ),
+                                    )
+                                    .toList(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 24),
-                  Text(
-                    "Trending",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  if (trending.isNotEmpty)
-                    GestureDetector(
-                      onTap: () {},
-                      child: BeritaCard(
-                        title: trending[0]['judul'],
-                        imageUrl:
-                            trending[0]['gambar'] != null &&
-                                    trending[0]['gambar'] != ''
-                                ? '$baseUrl/uploads/${Uri.parse(trending[0]['gambar']).pathSegments.last}'
-                                : 'https://cdn.pixabay.com/photo/2025/05/18/14/05/congratulations-9607355_960_720.png',
-                        isLarge: true,
-                      ),
-                    ),
-                  SizedBox(height: 24),
-                  Text(
-                    "Kategori",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  GestureDetector(
-                    child: Wrap(
-                      spacing: 8,
-                      children:
-                          kategori
-                              .map(
-                                (item) =>
-                                    Chip(label: Text(item['nama_kategori'])),
-                              )
-                              .toList(),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        );
+
+      floatingActionButton:
+          role != null && role != 'pembaca'
+              ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HalamanPostArtikel(),
+                    ),
+                  );
+                },
+                child: Icon(Icons.add),
+              )
+              : null,
+    );
   }
 }
