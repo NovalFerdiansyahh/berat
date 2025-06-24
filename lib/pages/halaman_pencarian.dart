@@ -1,6 +1,9 @@
+import 'package:berat/pages/halaman_detail.dart';
+import 'package:berat/pages/halaman_utama.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'constanta.dart';
 
 void main() {
   runApp(
@@ -24,7 +27,8 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
   bool _loading = false;
 
   Future<void> _cariData(String keyword) async {
-    if (keyword.trim().isEmpty) return;
+    keyword = keyword.trim();
+    if (keyword.isEmpty) return;
 
     setState(() {
       _allhistory.remove(keyword);
@@ -34,31 +38,56 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
     });
 
     try {
-      final response = await http.get(Uri.parse('url'));
+      final uri = Uri.parse(
+        'https://37b1-36-73-34-151.ngrok-free.app/api/artikel/search/',
+      ).replace(queryParameters: {'keyword': keyword});
+
+      final response = await http.get(uri);
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          _hasilArtikel = data;
-        });
+        final body = response.body;
+
+        try {
+          final data = json.decode(body);
+
+          if (data is List) {
+            setState(() {
+              _hasilArtikel = data;
+            });
+          } else if (data is Map && data.containsKey('data')) {
+            setState(() {
+              _hasilArtikel = data['data'];
+            });
+          } else {
+            throw Exception("Format data tidak dikenali.");
+          }
+
+          _controller.clear();
+        } catch (e) {
+          print("Gagal decode JSON: $e");
+          throw Exception("Format JSON tidak valid.");
+        }
       } else {
-        throw Exception('Gagal memuat data');
+        throw Exception('Status bukan 200: ${response.statusCode}');
       }
     } catch (e) {
       print("Error: $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan saat mencari')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: ${e.toString()}')),
+      );
     } finally {
       setState(() {
         _loading = false;
       });
     }
-
-    _controller.clear();
   }
 
   void _isiDariHistori(String keyword) {
+    keyword = keyword.trim();
+    if (keyword.isEmpty) return;
     setState(() {
       _controller.text = keyword;
     });
@@ -88,7 +117,10 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                   IconButton(
                     icon: Icon(Icons.arrow_back, color: Colors.teal[200]),
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HalamanUtama()),
+                      );
                     },
                   ),
                   Expanded(
@@ -199,17 +231,64 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                           itemCount: _hasilArtikel.length,
                           itemBuilder: (context, index) {
                             final artikel = _hasilArtikel[index];
-                            return Card(
-                              child: ListTile(
-                                title: Text(artikel['judul'] ?? 'Tanpa Judul'),
-                                subtitle: Text(
-                                  artikel['konten']?.toString().substring(
-                                        0,
-                                        50,
-                                      ) ??
-                                      '',
+                            final gambarPath = artikel['gambar'] ?? '';
+                            final gambarUrl =
+                                gambarPath.startsWith('http')
+                                    ? gambarPath.replaceFirst(
+                                      'localhost',
+                                      '37b1-36-73-34-151.ngrok-free.app',
+                                    )
+                                    : 'http://37b1-36-73-34-151.ngrok-free.app$gambarPath';
+
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => HalamanDetail(),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.all(8),
+                                  leading:
+                                      gambarUrl.isNotEmpty
+                                          ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            child: Image.network(
+                                              gambarUrl,
+                                              width: 60,
+                                              height: 60,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Icon(
+                                                    Icons.broken_image,
+                                                    size: 60,
+                                                  ),
+                                            ),
+                                          )
+                                          : Icon(
+                                            Icons.image_not_supported,
+                                            size: 60,
+                                          ),
+                                  title: Text(
+                                    artikel['judul'] ?? 'Tanpa Judul',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text(
+                                    artikel['isi']?.toString() ?? '',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                onTap: () {},
                               ),
                             );
                           },
