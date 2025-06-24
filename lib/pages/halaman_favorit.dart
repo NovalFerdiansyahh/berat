@@ -79,7 +79,10 @@ class _FavoritState extends State<Favorit> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.teal[200]),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => HalamanFavorit()),
+);
           },
         ),
         title: Text(
