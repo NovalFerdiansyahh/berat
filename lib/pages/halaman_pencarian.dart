@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'constanta.dart';
+import 'halaman_detail.dart';
 
 void main() {
   runApp(
@@ -245,7 +246,10 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => HalamanDetail(),
+                                    builder:
+                                        (context) => HalamanDetail(
+                                          idArtikel: artikel.id,
+                                        ),
                                   ),
                                 );
                               },
