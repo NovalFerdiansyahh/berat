@@ -1,3 +1,4 @@
+import 'package:berat/pages/halaman_utama.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'constanta.dart';
@@ -39,18 +40,27 @@ class _FavoritState extends State<Favorit> {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           Favorites =
-              data
-                  .map(
-                    (item) => {
-                      'idFavorit': item['id_favorit'],
-                      'idUser': item['id_user'],
-                      'idArtikel': item['id_artikel'],
-                      'createdAt': item['created_at'],
-                      'updateAt': item['updated_at'],
-                      'isBookmarked': item['isBookmarked'] ?? true,
-                    },
-                  )
-                  .toList();
+              data.map<Map<String, dynamic>>((item) {
+                String? imageUrl = item['gambar']?.toString();
+                if (imageUrl != null && imageUrl.contains('localhost')) {
+                  imageUrl = imageUrl.replaceAll(
+                    'localhost',
+                    '82c5-36-73-34-151.ngrok-free.app',
+                  );
+                }
+
+                return {
+                  'idFavorit': item['id_favorit'],
+                  'idUser': item['id_user'],
+                  'idArtikel': item['id_artikel'],
+                  'createdAt': item['created_at'],
+                  'updateAt': item['updated_at'],
+                  'isBookmarked': item['isBookmarked'] ?? true,
+                  'title': item['judul'] ?? 'Tanpa Judul',
+                  'imageUrl': imageUrl,
+                  'source': item['sumber'] ?? 'Tidak diketahui',
+                };
+              }).toList();
           isLoading = false;
         });
       } else {
@@ -79,7 +89,10 @@ class _FavoritState extends State<Favorit> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.teal[200]),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HalamanUtama()),
+            );
           },
         ),
         title: Text(
@@ -102,6 +115,8 @@ class _FavoritState extends State<Favorit> {
                 itemCount: Favorites.length,
                 itemBuilder: (context, index) {
                   final item = Favorites[index];
+                  final imageUrl = item['imageUrl'];
+
                   return Card(
                     color: Colors.grey[300],
                     shape: RoundedRectangleBorder(
@@ -110,6 +125,28 @@ class _FavoritState extends State<Favorit> {
                     margin: EdgeInsets.only(bottom: 12),
                     child: Row(
                       children: [
+
+                        if (imageUrl != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              imageUrl,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (context, error, stackTrace) =>
+                                      Icon(Icons.broken_image),
+                            ),
+                          )
+                        else
+                          Container(
+                            width: 60,
+                            height: 60,
+                            color: Colors.grey,
+                            child: Icon(Icons.image_not_supported),
+                          ),
+
                         // ClipRRect(
                         //   borderRadius: BorderRadius.circular(8),
                         //   child: Image.network(
@@ -119,32 +156,37 @@ class _FavoritState extends State<Favorit> {
                         //     fit: BoxFit.cover,
                         //   ),
                         // ),
+
                         SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '"${item['title']}"',
+                                item['title'],
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 6),
+
+                              Text(
+                                item['source'],
+                                style: TextStyle(color: Colors.black54),
+                              ),
+
                               // Text(
                               //   item['source']!,
                               //   style: TextStyle(color: Colors.black54),
                               // ),
+
                             ],
                           ),
                         ),
                         IconButton(
                           icon: Icon(
-                            (item['isBookmark'] ?? false)
+                            (item['isBookmarked'] ?? false)
                                 ? Icons.bookmark
-                                : Icons.bookmark,
-                            color:
-                                (item['isBookmarked'] ?? false)
-                                    ? Colors.teal[200]
-                                    : Colors.teal[200],
+                                : Icons.bookmark_border,
+                            color: Colors.teal[200],
                           ),
                           onPressed: () => toggleBookmark(index),
                         ),
