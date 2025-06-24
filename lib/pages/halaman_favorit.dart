@@ -125,6 +125,7 @@ class _FavoritState extends State<Favorit> {
                     margin: EdgeInsets.only(bottom: 12),
                     child: Row(
                       children: [
+
                         if (imageUrl != null)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
@@ -145,6 +146,17 @@ class _FavoritState extends State<Favorit> {
                             color: Colors.grey,
                             child: Icon(Icons.image_not_supported),
                           ),
+
+                        // ClipRRect(
+                        //   borderRadius: BorderRadius.circular(8),
+                        //   child: Image.network(
+                        //     item['image']!,
+                        //     width: 60,
+                        //     height: 60,
+                        //     fit: BoxFit.cover,
+                        //   ),
+                        // ),
+
                         SizedBox(width: 10),
                         Expanded(
                           child: Column(
@@ -155,10 +167,17 @@ class _FavoritState extends State<Favorit> {
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 6),
+
                               Text(
                                 item['source'],
                                 style: TextStyle(color: Colors.black54),
                               ),
+
+                              // Text(
+                              //   item['source']!,
+                              //   style: TextStyle(color: Colors.black54),
+                              // ),
+
                             ],
                           ),
                         ),
