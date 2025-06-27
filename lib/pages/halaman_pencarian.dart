@@ -40,7 +40,7 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
 
     try {
       final uri = Uri.parse(
-        'https://37b1-36-73-34-151.ngrok-free.app/api/artikel/search/',
+        '$baseUrl/api/artikel/search/',
       ).replace(queryParameters: {'keyword': keyword});
 
       final response = await http.get(uri);
@@ -237,9 +237,9 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                                 gambarPath.startsWith('http')
                                     ? gambarPath.replaceFirst(
                                       'localhost',
-                                      '37b1-36-73-34-151.ngrok-free.app',
+                                      '$baseUrl',
                                     )
-                                    : 'http://37b1-36-73-34-151.ngrok-free.app$gambarPath';
+                                    : '$baseUrl$gambarPath';
 
                             return GestureDetector(
                               onTap: () {
@@ -248,7 +248,9 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                                   MaterialPageRoute(
                                     builder:
                                         (context) => HalamanDetail(
-                                          idArtikel: artikel.id,
+                                          idArtikel: int.parse(
+                                            artikel['id_artikel'],
+                                          ),
                                         ),
                                   ),
                                 );
