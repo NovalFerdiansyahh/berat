@@ -18,7 +18,6 @@ class HalamanDetail extends StatefulWidget {
   State<HalamanDetail> createState() => _HalamanDetailState();
 }
 
-
 class _HalamanDetailState extends State<HalamanDetail> {
   Artikel? artikel;
   bool isLoading = true;
@@ -29,11 +28,17 @@ class _HalamanDetailState extends State<HalamanDetail> {
     fetchArtikel();
   }
 
- Future<void> fetchArtikel() async {
+  Future<void> fetchArtikel() async {
   try {
     final response = await http.get(Uri.parse('$baseUrl/api/artikel/${widget.idArtikel}'));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+
+      print("===[ DEBUG ARTIKEL ]===");
+      print("Judul: ${data['judul']}");
+      print("Gambar: ${data['gambar']}");
+      print("Full JSON: $data");
+
       setState(() {
         artikel = Artikel.fromJson(data);
         isLoading = false;
@@ -45,6 +50,7 @@ class _HalamanDetailState extends State<HalamanDetail> {
     print("Error saat fetch artikel: $e");
   }
 }
+
 
   @override
   Widget build(BuildContext context) {
@@ -69,30 +75,31 @@ class _HalamanDetailState extends State<HalamanDetail> {
                         icon: Icon(Icons.arrow_back, color: Colors.teal[200], size: 30),
                       ),
                     ),
+                    
                     artikel!.gambar != null && artikel!.gambar!.isNotEmpty
-                      ? Image.network(
-                          artikel!.gambar!.startsWith("http")
-                              ? artikel!.gambar!
-                              : "$baseUrl/uploads/${artikel!.gambar}",
-                          width: MediaQuery.of(context).size.width,
-                          height: 250,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 250,
-                              color: Colors.grey[300],
-                              child: Icon(Icons.broken_image, size: 100),
-                            );
-                          },
-                        )
-                      : Container(
-                          height: 250,
-                          width: double.infinity,
-                          color: Colors.grey[300],
-                          child: Icon(Icons.image, size: 100),
-                        ),
-
-
+                        ? Image.network(
+                          
+                            artikel!.gambar!.startsWith("http")
+                                ? artikel!.gambar!
+                                : "$baseUrl/uploads/${artikel!.gambar}",
+                            width: MediaQuery.of(context).size.width,
+                            height: 250,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 250,
+                                color: Colors.grey[300],
+                                child: Icon(Icons.broken_image, size: 100),
+                              );
+                            },
+                          )
+                          
+                        : Container(
+                            height: 250,
+                            width: double.infinity,
+                            color: Colors.grey[300],
+                            child: Icon(Icons.image, size: 100),
+                          ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
@@ -114,44 +121,38 @@ class _HalamanDetailState extends State<HalamanDetail> {
                       children: [
                         Column(
                           children: [
-                           IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HalamanKomentar(idArtikel: int.parse(artikel!.idArtikel)),
-
-                            )
-                            );
-                          },
-                          icon: Icon(Icons.comment),
-                        ),
-
+                            IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => HalamanKomentar(idArtikel: int.parse(artikel!.idArtikel)),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.comment),
+                            ),
                             Text("Comment"),
                           ],
                         ),
                         Column(
                           children: [
                             IconButton(
-                          onPressed: () {
-                            // Tampilkan snackbar
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Berita telah disimpan"),
-                                duration: Duration(seconds: 2),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-
-                            // Navigasi ke halaman favorit
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => HalamanFavorit()),
-                            );
-                          },
-                          icon: Icon(Icons.bookmark),
-                        ),
-
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Berita telah disimpan"),
+                                    duration: Duration(seconds: 2),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => HalamanFavorit()),
+                                );
+                              },
+                              icon: Icon(Icons.bookmark),
+                            ),
                             Text("Simpan"),
                           ],
                         ),

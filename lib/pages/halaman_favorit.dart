@@ -45,7 +45,7 @@ class _FavoritState extends State<Favorit> {
                 if (imageUrl != null && imageUrl.contains('localhost')) {
                   imageUrl = imageUrl.replaceAll(
                     'localhost',
-                    '82c5-36-73-34-151.ngrok-free.app',
+                    'https://d130-103-185-27-58.ngrok-free.app',
                   );
                 }
 
@@ -86,15 +86,6 @@ class _FavoritState extends State<Favorit> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.teal[200]),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HalamanUtama()),
-            );
-          },
-        ),
         title: Text(
           'Favorit',
           style: TextStyle(
@@ -125,7 +116,6 @@ class _FavoritState extends State<Favorit> {
                     margin: EdgeInsets.only(bottom: 12),
                     child: Row(
                       children: [
-
                         if (imageUrl != null)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
@@ -156,7 +146,6 @@ class _FavoritState extends State<Favorit> {
                         //     fit: BoxFit.cover,
                         //   ),
                         // ),
-
                         SizedBox(width: 10),
                         Expanded(
                           child: Column(
@@ -177,7 +166,6 @@ class _FavoritState extends State<Favorit> {
                               //   item['source']!,
                               //   style: TextStyle(color: Colors.black54),
                               // ),
-
                             ],
                           ),
                         ),

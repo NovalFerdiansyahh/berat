@@ -115,15 +115,6 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.teal[200]),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => HalamanUtama()),
-                      );
-                    },
-                  ),
                   Expanded(
                     child: Center(
                       child: Text(
@@ -135,7 +126,6 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 50),
                 ],
               ),
               SizedBox(height: 15),
@@ -237,6 +227,7 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                                 gambarPath.startsWith('http')
                                     ? gambarPath.replaceFirst(
                                       'localhost',
+
                                       '$baseUrl',
                                     )
                                     : '$baseUrl$gambarPath';
