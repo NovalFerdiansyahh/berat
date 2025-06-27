@@ -227,9 +227,10 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                                 gambarPath.startsWith('http')
                                     ? gambarPath.replaceFirst(
                                       'localhost',
-                                      'https://d130-103-185-27-58.ngrok-free.app',
+
+                                      '$baseUrl',
                                     )
-                                    : 'https://d130-103-185-27-58.ngrok-free.app/$gambarPath';
+                                    : '$baseUrl$gambarPath';
 
                             return GestureDetector(
                               onTap: () {
@@ -238,7 +239,9 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                                   MaterialPageRoute(
                                     builder:
                                         (context) => HalamanDetail(
-                                          idArtikel: artikel.id,
+                                          idArtikel: int.parse(
+                                            artikel['id_artikel'],
+                                          ),
                                         ),
                                   ),
                                 );
