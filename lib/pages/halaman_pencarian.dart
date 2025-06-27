@@ -40,7 +40,7 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
 
     try {
       final uri = Uri.parse(
-        'https://37b1-36-73-34-151.ngrok-free.app/api/artikel/search/',
+        '$baseUrl/api/artikel/search/',
       ).replace(queryParameters: {'keyword': keyword});
 
       final response = await http.get(uri);
@@ -115,15 +115,6 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.teal[200]),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => HalamanUtama()),
-                      );
-                    },
-                  ),
                   Expanded(
                     child: Center(
                       child: Text(
@@ -135,7 +126,6 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 50),
                 ],
               ),
               SizedBox(height: 15),
@@ -237,9 +227,9 @@ class _HalamanPencarianState extends State<HalamanPencarian> {
                                 gambarPath.startsWith('http')
                                     ? gambarPath.replaceFirst(
                                       'localhost',
-                                      '37b1-36-73-34-151.ngrok-free.app',
+                                      'https://d130-103-185-27-58.ngrok-free.app',
                                     )
-                                    : 'http://37b1-36-73-34-151.ngrok-free.app$gambarPath';
+                                    : 'https://d130-103-185-27-58.ngrok-free.app/$gambarPath';
 
                             return GestureDetector(
                               onTap: () {
