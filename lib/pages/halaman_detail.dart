@@ -18,8 +18,8 @@ class HalamanDetail extends StatefulWidget {
   State<HalamanDetail> createState() => _HalamanDetailState();
 }
 
-
 class _HalamanDetailState extends State<HalamanDetail> {
+  bool isBookmarked = false;
   Artikel? artikel;
   bool isLoading = true;
 
@@ -27,24 +27,65 @@ class _HalamanDetailState extends State<HalamanDetail> {
   void initState() {
     super.initState();
     fetchArtikel();
+    cekBookmarkStatus();
   }
 
- Future<void> fetchArtikel() async {
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/api/artikel/${widget.idArtikel}'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        artikel = Artikel.fromJson(data);
-        isLoading = false;
-      });
-    } else {
-      throw Exception("Gagal memuat artikel");
+  Future<void> fetchArtikel() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api/artikel/${widget.idArtikel}'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        setState(() {
+          artikel = Artikel.fromJson(data);
+          isLoading = false;
+        });
+      } else {
+        throw Exception("Gagal memuat artikel");
+      }
+    } catch (e) {
+      print("Error saat fetch artikel: $e");
     }
-  } catch (e) {
-    print("Error saat fetch artikel: $e");
   }
-}
+
+  Future<void> cekBookmarkStatus() async {
+    final response = await http.get(Uri.parse('$baseUrl/api/cek-favorit?id_user=1&id_artikel=${widget.idArtikel}'));
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+      setState(() {
+        isBookmarked = result['isFavorit'] == true;
+      });
+    }
+  }
+
+  Future<void> simpanBookmark() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/favorit'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "id_user": 4,
+        "id_artikel": widget.idArtikel,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        isBookmarked = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Berita telah disimpan"),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal menyimpan ke favorit")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,29 +111,27 @@ class _HalamanDetailState extends State<HalamanDetail> {
                       ),
                     ),
                     artikel!.gambar != null && artikel!.gambar!.isNotEmpty
-                      ? Image.network(
-                          artikel!.gambar!.startsWith("http")
-                              ? artikel!.gambar!
-                              : "$baseUrl/uploads/${artikel!.gambar}",
-                          width: MediaQuery.of(context).size.width,
-                          height: 250,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 250,
-                              color: Colors.grey[300],
-                              child: Icon(Icons.broken_image, size: 100),
-                            );
-                          },
-                        )
-                      : Container(
-                          height: 250,
-                          width: double.infinity,
-                          color: Colors.grey[300],
-                          child: Icon(Icons.image, size: 100),
-                        ),
-
-
+                        ? Image.network(
+                            artikel!.gambar!.startsWith("http")
+                                ? artikel!.gambar!
+                                : "$baseUrl/uploads/${artikel!.gambar}",
+                            width: MediaQuery.of(context).size.width,
+                            height: 250,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 250,
+                                color: Colors.grey[300],
+                                child: Icon(Icons.broken_image, size: 100),
+                              );
+                            },
+                          )
+                        : Container(
+                            height: 250,
+                            width: double.infinity,
+                            color: Colors.grey[300],
+                            child: Icon(Icons.image, size: 100),
+                          ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
@@ -114,44 +153,33 @@ class _HalamanDetailState extends State<HalamanDetail> {
                       children: [
                         Column(
                           children: [
-                           IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HalamanKomentar(idArtikel: int.parse(artikel!.idArtikel)),
-
-                            )
-                            );
-                          },
-                          icon: Icon(Icons.comment),
-                        ),
-
+                            IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => HalamanKomentar(idArtikel: int.parse(artikel!.idArtikel)),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.comment),
+                            ),
                             Text("Comment"),
                           ],
                         ),
                         Column(
                           children: [
                             IconButton(
-                          onPressed: () {
-                            // Tampilkan snackbar
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Berita telah disimpan"),
-                                duration: Duration(seconds: 2),
-                                behavior: SnackBarBehavior.floating,
+                              onPressed: () {
+                                if (!isBookmarked) {
+                                  simpanBookmark();
+                                }
+                              },
+                              icon: Icon(
+                                Icons.bookmark,
+                                color: isBookmarked ? Colors.teal : Colors.grey,
                               ),
-                            );
-
-                            // Navigasi ke halaman favorit
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => HalamanFavorit()),
-                            );
-                          },
-                          icon: Icon(Icons.bookmark),
-                        ),
-
+                            ),
                             Text("Simpan"),
                           ],
                         ),
@@ -221,12 +249,19 @@ class _HalamanDetailState extends State<HalamanDetail> {
                                             Column(
                                               children: [
                                                 IconButton(
-                                                  onPressed: () {},
-                                                  icon: Image.network(
-                                                    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/960px-Facebook_f_logo_%282019%29.svg.png",
-                                                    width: 40,
-                                                    height: 40,
-                                                  ),
+                                                  onPressed: () async {
+                                                  final String link = "$baseUrl/artikel/${artikel!.idArtikel}";
+                                                  final url = "https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(link)}";
+
+                                                  if (await canLaunchUrl(Uri.parse(url))) {
+                                                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                                                  } else {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(content: Text("Gagal membuka Facebook")),
+                                                    );
+                                                  }
+                                                }, icon: Icon(Icons.face),
+
                                                 ),
                                                 Text("Facebook", style: TextStyle(fontSize: 12)),
                                               ],

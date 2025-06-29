@@ -1,4 +1,7 @@
+import 'package:berat/pages/halaman_artikel_by_kategori.dart';
 import 'package:berat/pages/halaman_detail.dart';
+import 'package:berat/pages/halaman_notifikasi.dart';
+import 'package:berat/pages/halaman_pencarian.dart';
 import 'package:berat/pages/halaman_post.dart';
 import 'package:berat/widgets/berita_card.dart';
 import 'package:flutter/material.dart';
@@ -83,6 +86,36 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
         }).toList();
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: Icon(Icons.notifications, color: Colors.black),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NotifikasiPage(idUser: userId ?? ''),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.search, color: Colors.black),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HalamanPencarian()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body:
           isLoading
               ? Center(child: CircularProgressIndicator())
@@ -164,18 +197,32 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        GestureDetector(
-                          child: Wrap(
-                            spacing: 8,
-                            children:
-                                kategori
-                                    .map(
-                                      (item) => Chip(
-                                        label: Text(item['nama_kategori']),
+                        Wrap(
+                          spacing: 8,
+                          children:
+                              kategori.map((item) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (_) => HalamanArtikelByKategori(
+                                              idKategori:
+                                                  item['id_kategori']
+                                                      .toString(),
+                                              namaKategori:
+                                                  item['nama_kategori'],
+                                            ),
                                       ),
-                                    )
-                                    .toList(),
-                          ),
+                                    );
+                                  },
+                                  child: Chip(
+                                    label: Text(item['nama_kategori']),
+                                    backgroundColor: Colors.teal.shade100,
+                                  ),
+                                );
+                              }).toList(),
                         ),
                       ],
                     ),
@@ -186,13 +233,17 @@ class _HalamanUtamaContentState extends State<HalamanUtamaContent> {
       floatingActionButton:
           role != null && role != 'pembaca'
               ? FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => HalamanPostArtikel(),
                     ),
                   );
+
+                  if (result == true) {
+                    fetchBerita();
+                  }
                 },
                 child: Icon(Icons.add),
               )
