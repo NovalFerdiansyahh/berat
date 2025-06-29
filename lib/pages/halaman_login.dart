@@ -44,7 +44,12 @@ class _LoginPageState extends State<LoginPage> {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('idUser', user['id_user'].toString());
           await prefs.setString('role', user['role'].toString());
-          await prefs.setString('namaUser', user['nama_user'].toString());
+          await prefs.setString('idUser', user['id_user'].toString());
+          await prefs.setString('nama', user['nama'].toString());
+          await prefs.setString('tanggalLahir', user['tanggal_lahir'].toString());
+          await prefs.setString('noTelepon', user['no_telepon'].toString());
+          await prefs.setString('email', user['email'].toString());
+          await prefs.setString('role', user['role'].toString());
 
           Navigator.pushReplacement(
             context,
@@ -64,7 +69,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -124,9 +131,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: isLoading
-                        ? CircularProgressIndicator(color: Colors.white)
-                        : const Text('Login'),
+                    child:
+                        isLoading
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : const Text('Login'),
                   ),
                 ),
 
@@ -140,7 +148,9 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => RegisterPage()),
+                          MaterialPageRoute(
+                            builder: (context) => RegisterPage(),
+                          ),
                         );
                       },
                       child: const Text(
@@ -150,9 +160,9 @@ class _LoginPageState extends State<LoginPage> {
                           color: Colors.black,
                         ),
                       ),
-                    )
+                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),

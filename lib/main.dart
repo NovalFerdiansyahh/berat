@@ -7,9 +7,13 @@ import 'package:berat/pages/halaman_pencarian.dart';
 import 'package:berat/pages/halaman_utama.dart';
 import 'package:flutter/material.dart';
 
-void main(List<String> args) {
-  runApp(MyApp());
+void main() {
+  runApp(MaterialApp(
+    home: LoginPage(), // halaman utama dengan  BottomNavigationBar
+    debugShowCheckedModeBanner: false,
+  ));
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

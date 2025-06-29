@@ -19,6 +19,7 @@ class HalamanDetail extends StatefulWidget {
 }
 
 class _HalamanDetailState extends State<HalamanDetail> {
+  bool isBookmarked = false;
   Artikel? artikel;
   bool isLoading = true;
 
@@ -26,31 +27,65 @@ class _HalamanDetailState extends State<HalamanDetail> {
   void initState() {
     super.initState();
     fetchArtikel();
+    cekBookmarkStatus();
   }
 
   Future<void> fetchArtikel() async {
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/api/artikel/${widget.idArtikel}'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api/artikel/${widget.idArtikel}'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
 
-      print("===[ DEBUG ARTIKEL ]===");
-      print("Judul: ${data['judul']}");
-      print("Gambar: ${data['gambar']}");
-      print("Full JSON: $data");
-
-      setState(() {
-        artikel = Artikel.fromJson(data);
-        isLoading = false;
-      });
-    } else {
-      throw Exception("Gagal memuat artikel");
+        setState(() {
+          artikel = Artikel.fromJson(data);
+          isLoading = false;
+        });
+      } else {
+        throw Exception("Gagal memuat artikel");
+      }
+    } catch (e) {
+      print("Error saat fetch artikel: $e");
     }
-  } catch (e) {
-    print("Error saat fetch artikel: $e");
   }
-}
 
+  Future<void> cekBookmarkStatus() async {
+    final response = await http.get(Uri.parse('$baseUrl/api/cek-favorit?id_user=1&id_artikel=${widget.idArtikel}'));
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+      setState(() {
+        isBookmarked = result['isFavorit'] == true;
+      });
+    }
+  }
+
+  Future<void> simpanBookmark() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/favorit'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "id_user": 4,
+        "id_artikel": widget.idArtikel,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        isBookmarked = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Berita telah disimpan"),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal menyimpan ke favorit")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +110,8 @@ class _HalamanDetailState extends State<HalamanDetail> {
                         icon: Icon(Icons.arrow_back, color: Colors.teal[200], size: 30),
                       ),
                     ),
-                    
                     artikel!.gambar != null && artikel!.gambar!.isNotEmpty
                         ? Image.network(
-                          
                             artikel!.gambar!.startsWith("http")
                                 ? artikel!.gambar!
                                 : "$baseUrl/uploads/${artikel!.gambar}",
@@ -93,7 +126,6 @@ class _HalamanDetailState extends State<HalamanDetail> {
                               );
                             },
                           )
-                          
                         : Container(
                             height: 250,
                             width: double.infinity,
@@ -139,19 +171,14 @@ class _HalamanDetailState extends State<HalamanDetail> {
                           children: [
                             IconButton(
                               onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Berita telah disimpan"),
-                                    duration: Duration(seconds: 2),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => HalamanFavorit()),
-                                );
+                                if (!isBookmarked) {
+                                  simpanBookmark();
+                                }
                               },
-                              icon: Icon(Icons.bookmark),
+                              icon: Icon(
+                                Icons.bookmark,
+                                color: isBookmarked ? Colors.teal : Colors.grey,
+                              ),
                             ),
                             Text("Simpan"),
                           ],
@@ -221,14 +248,34 @@ class _HalamanDetailState extends State<HalamanDetail> {
                                             ),
                                             Column(
                                               children: [
-                                                IconButton(
-                                                  onPressed: () {},
-                                                  icon: Image.network(
-                                                    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/960px-Facebook_f_logo_%282019%29.svg.png",
-                                                    width: 40,
-                                                    height: 40,
-                                                  ),
+                                              IconButton(
+                                                onPressed: () async {
+                                                  final String judul = artikel!.judul;
+                                                  final String isi = artikel!.isi.length > 100
+                                                      ? artikel!.isi.substring(0, 100) + "..."
+                                                      : artikel!.isi;
+                                                  final String link = "$baseUrl/artikel/${artikel!.idArtikel}";
+
+                                                  final url = "https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(link)}";
+
+                                                  if (await canLaunchUrl(Uri.parse(url))) {
+                                                    await launchUrl(
+                                                      Uri.parse(url),
+                                                      mode: LaunchMode.externalApplication,
+                                                    );
+                                                  } else {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(content: Text("Gagal membuka Facebook")),
+                                                    );
+                                                  }
+                                                },
+                                                icon: Image.network(
+                                                  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/960px-Facebook_f_logo_%282019%29.svg.png",
+                                                  width: 40,
+                                                  height: 40,
                                                 ),
+                                              ),
+
                                                 Text("Facebook", style: TextStyle(fontSize: 12)),
                                               ],
                                             ),

@@ -1,4 +1,5 @@
 import 'package:berat/pages/halaman_utama.dart';
+import 'package:berat/pages/halaman_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'constanta.dart';
@@ -13,7 +14,7 @@ class HalamanFavorit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: Favorit(), debugShowCheckedModeBanner: false);
+    return Favorit();
   }
 }
 
@@ -108,7 +109,17 @@ class _FavoritState extends State<Favorit> {
                   final item = Favorites[index];
                   final imageUrl = item['imageUrl'];
 
-                  return Card(
+                  return InkWell(
+                  onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HalamanDetail(idArtikel: int.parse(item['idArtikel'])),
+                        ),
+                      );
+                      fetchFavorites(); 
+                    },
+                  child: Card(
                     color: Colors.grey[300],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -124,9 +135,8 @@ class _FavoritState extends State<Favorit> {
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
-                              errorBuilder:
-                                  (context, error, stackTrace) =>
-                                      Icon(Icons.broken_image),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(Icons.broken_image),
                             ),
                           )
                         else
@@ -136,16 +146,6 @@ class _FavoritState extends State<Favorit> {
                             color: Colors.grey,
                             child: Icon(Icons.image_not_supported),
                           ),
-
-                        // ClipRRect(
-                        //   borderRadius: BorderRadius.circular(8),
-                        //   child: Image.network(
-                        //     item['image']!,
-                        //     width: 60,
-                        //     height: 60,
-                        //     fit: BoxFit.cover,
-                        //   ),
-                        // ),
                         SizedBox(width: 10),
                         Expanded(
                           child: Column(
@@ -156,16 +156,10 @@ class _FavoritState extends State<Favorit> {
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 6),
-
                               Text(
                                 item['source'],
                                 style: TextStyle(color: Colors.black54),
                               ),
-
-                              // Text(
-                              //   item['source']!,
-                              //   style: TextStyle(color: Colors.black54),
-                              // ),
                             ],
                           ),
                         ),
@@ -180,7 +174,8 @@ class _FavoritState extends State<Favorit> {
                         ),
                       ],
                     ),
-                  );
+                  ),
+                );
                 },
               ),
     );

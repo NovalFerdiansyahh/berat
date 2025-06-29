@@ -24,6 +24,7 @@ class _HalamanKomentarState extends State<HalamanKomentar> {
   void initState() {
     super.initState();
     fetchDetailArtikel();
+    fetchKomentar();
   }
 
   Future<void> fetchDetailArtikel() async {
@@ -41,6 +42,51 @@ class _HalamanKomentarState extends State<HalamanKomentar> {
       }
     } catch (e) {
       print("Error saat fetch artikel: $e");
+    }
+  }
+
+  Future<void> fetchKomentar() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api/komentar/artikel/${widget.idArtikel}'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          komentarList = data.map((e) => {
+            "username": e['nama_user'] ?? 'Anonim',
+            "komentar": e['isi_komentar'] ?? '',
+            "warna": Colors.teal
+          }).toList();
+        });
+      }
+    } catch (e) {
+      print("Gagal memuat komentar: $e");
+    }
+  }
+
+  void _tambahKomentar() async {
+    final komentarText = _controller.text.trim();
+    if (komentarText.isEmpty) return;
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/komentar'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "id_user": 4,
+        "id_artikel": widget.idArtikel,
+        "isi_komentar": komentarText,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      _controller.clear();
+      fetchKomentar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Komentar berhasil dikirim")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal mengirim komentar")),
+      );
     }
   }
 
@@ -75,19 +121,6 @@ class _HalamanKomentarState extends State<HalamanKomentar> {
         ],
       ),
     );
-  }
-
-  void _tambahKomentar() {
-    if (_controller.text.trim().isEmpty) return;
-
-    setState(() {
-      komentarList.add({
-        "username": "Anda",
-        "komentar": _controller.text.trim(),
-        "warna": const Color.fromARGB(255, 163, 19, 19),
-      });
-      _controller.clear();
-    });
   }
 
   @override
@@ -184,7 +217,7 @@ class _HalamanKomentarState extends State<HalamanKomentar> {
                           ),
                         ),
                         SizedBox(width: 8),
-                        IconButton(  
+                        IconButton(
                           onPressed: _tambahKomentar,
                           icon: Icon(Icons.send),
                           color: Colors.teal,
