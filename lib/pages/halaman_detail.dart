@@ -248,21 +248,34 @@ class _HalamanDetailState extends State<HalamanDetail> {
                                             ),
                                             Column(
                                               children: [
-                                                IconButton(
-                                                  onPressed: () async {
+                                              IconButton(
+                                                onPressed: () async {
+                                                  final String judul = artikel!.judul;
+                                                  final String isi = artikel!.isi.length > 100
+                                                      ? artikel!.isi.substring(0, 100) + "..."
+                                                      : artikel!.isi;
                                                   final String link = "$baseUrl/artikel/${artikel!.idArtikel}";
+
                                                   final url = "https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(link)}";
 
                                                   if (await canLaunchUrl(Uri.parse(url))) {
-                                                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                                                    await launchUrl(
+                                                      Uri.parse(url),
+                                                      mode: LaunchMode.externalApplication,
+                                                    );
                                                   } else {
                                                     ScaffoldMessenger.of(context).showSnackBar(
                                                       SnackBar(content: Text("Gagal membuka Facebook")),
                                                     );
                                                   }
-                                                }, icon: Icon(Icons.face),
-
+                                                },
+                                                icon: Image.network(
+                                                  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/960px-Facebook_f_logo_%282019%29.svg.png",
+                                                  width: 40,
+                                                  height: 40,
                                                 ),
+                                              ),
+
                                                 Text("Facebook", style: TextStyle(fontSize: 12)),
                                               ],
                                             ),

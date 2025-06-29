@@ -111,15 +111,14 @@ class _FavoritState extends State<Favorit> {
 
                   return InkWell(
                   onTap: () async {
-  await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => HalamanDetail(idArtikel: int.parse(item['idArtikel'])),
-    ),
-  );
-  // Refresh data favorit setelah kembali dari halaman detail
-  fetchFavorites(); // ini akan memperbarui daftar favorit
-},
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HalamanDetail(idArtikel: int.parse(item['idArtikel'])),
+                        ),
+                      );
+                      fetchFavorites(); 
+                    },
                   child: Card(
                     color: Colors.grey[300],
                     shape: RoundedRectangleBorder(
