@@ -1,3 +1,4 @@
+import 'package:berat/pages/constanta.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'halaman_ubah_profil.dart';
@@ -15,6 +16,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String noTelepon = '';
   String email = '';
   String role = '';
+  String fotoProfil = '';
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
       noTelepon = prefs.getString('noTelepon') ?? '';
       email = prefs.getString('email') ?? '';
       role = prefs.getString('role') ?? '';
+      fotoProfil = prefs.getString('fotoProfil') ?? '';
     });
   }
 
@@ -38,7 +41,9 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           contentPadding: EdgeInsets.all(20),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -55,9 +60,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   ElevatedButton(
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();
-                      await prefs.clear(); // Hapus semua data user
-                      Navigator.pop(context); // Tutup dialog
-                      Navigator.pop(context); // Kembali ke halaman sebelumnya atau login
+                      await prefs.clear();
+                      Navigator.pop(context);
+                      Navigator.pop(context);
                     },
                     child: Text('Ya'),
                     style: ElevatedButton.styleFrom(
@@ -111,10 +116,19 @@ class _ProfilePageState extends State<ProfilePage> {
             CircleAvatar(
               radius: 48,
               backgroundColor: Colors.grey[300],
-              child: Icon(Icons.person, size: 48, color: Colors.grey[700]),
+              backgroundImage: (fotoProfil != null && fotoProfil!.isNotEmpty)
+                  ? NetworkImage('$baseUrl/uploads/$fotoProfil')
+                  : null,
+              child: (fotoProfil == null || fotoProfil!.isEmpty)
+                  ? Icon(Icons.person, size: 48, color: Colors.grey[700])
+                  : null,
             ),
+
             SizedBox(height: 12),
-            Text(nama, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              nama,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             SizedBox(height: 24),
             InfoRow(label: 'Tanggal Lahir', value: tanggalLahir),
             Divider(),
@@ -138,11 +152,16 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             SizedBox(height: 36),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EditProfilePage()),
                 );
+
+                if (result == true) {
+                  loadUserData();
+                  setState(() {});
+                }
               },
               child: Text('Ubah Profil'),
               style: ElevatedButton.styleFrom(
@@ -174,9 +193,15 @@ class InfoRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400)),
+          Text(
+            label,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+          ),
           SizedBox(height: 4),
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            value,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
           SizedBox(height: 12),
         ],
       ),
