@@ -47,7 +47,6 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
     final List<Widget> _pages = [
       HalamanUtamaContent(),
-      HalamanPencarian(),
       HalamanFavorit(),
       ProfilePage(),
     ];
@@ -57,7 +56,6 @@ class _HalamanUtamaState extends State<HalamanUtama> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Cari"),
           BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Favorit"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
