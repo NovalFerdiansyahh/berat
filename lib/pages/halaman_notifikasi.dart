@@ -1,11 +1,18 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'constanta.dart';
 
 class NotifikasiPage extends StatefulWidget {
   final String idUser;
-  const NotifikasiPage({Key? key, required this.idUser}) : super(key: key);
+  final VoidCallback? onNotificationRead;
+
+  const NotifikasiPage({
+    Key? key,
+    required this.idUser,
+    this.onNotificationRead,
+  }) : super(key: key);
 
   @override
   State<NotifikasiPage> createState() => _NotifikasiPageState();
@@ -22,16 +29,60 @@ class _NotifikasiPageState extends State<NotifikasiPage> {
   }
 
   Future<void> fetchNotifikasi() async {
-    final url = Uri.parse('$baseUrl${widget.idUser}');
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
+    final url = Uri.parse('$baseUrl/api/notifikasi/user/${widget.idUser}');
+    print("Memanggil URL: $url");
+
+    try {
+      final response = await http.get(url);
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final data = decoded['data'];
+
+        if (data is List) {
+          setState(() {
+            notifikasi = data;
+            loading = false;
+          });
+        } else {
+          setState(() {
+            notifikasi = [data];
+            loading = false;
+          });
+        }
+      } else {
+        setState(() {
+          loading = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal memuat notifikasi')));
+      }
+    } catch (e) {
       setState(() {
-        notifikasi = jsonDecode(response.body);
         loading = false;
       });
-    } else {
-      setState(() => loading = false);
-      print('Gagal memuat notifikasi');
+      print("Terjadi kesalahan: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+    }
+  }
+
+  Future<void> tandaiSudahDibaca(String idNotifikasi) async {
+    final url = Uri.parse('$baseUrl/api/notifikasi/baca/$idNotifikasi');
+
+    try {
+      final response = await http.put(url);
+      if (response.statusCode == 200) {
+        print('Notifikasi ditandai sudah dibaca');
+      } else {
+        print('Gagal menandai notifikasi: ${response.body}');
+      }
+    } catch (e) {
+      print('Error saat menandai notifikasi: $e');
     }
   }
 
@@ -42,31 +93,54 @@ class _NotifikasiPageState extends State<NotifikasiPage> {
       body:
           loading
               ? Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                itemCount: notifikasi.length,
-                itemBuilder: (context, index) {
-                  final item = notifikasi[index];
-                  final waktu = DateTime.parse(item['created_at']['date']);
-                  final sudahDibaca = item['dibaca'] == '1';
+              : notifikasi.isEmpty
+              ? Center(child: Text("Tidak ada notifikasi"))
+              : RefreshIndicator(
+                onRefresh: fetchNotifikasi,
+                child: ListView.builder(
+                  itemCount: notifikasi.length,
+                  itemBuilder: (context, index) {
+                    final item = notifikasi[index];
+                    final sudahDibaca = item['dibaca'] == '1';
 
-                  return ListTile(
-                    leading: Icon(
-                      sudahDibaca
-                          ? Icons.mark_email_read
-                          : Icons.mark_email_unread,
-                      color: sudahDibaca ? Colors.grey : Colors.redAccent,
-                    ),
-                    title: Text(
-                      item['judul'],
-                      style: TextStyle(
-                        fontWeight:
-                            sudahDibaca ? FontWeight.normal : FontWeight.bold,
+                    // Parsing tanggal yang aman
+                    final createdAt = item['created_at'];
+                    final waktu =
+                        DateTime.tryParse(
+                          createdAt is Map
+                              ? createdAt['date']
+                              : createdAt.toString(),
+                        ) ??
+                        DateTime.now();
+
+                    return ListTile(
+                      leading: Icon(
+                        sudahDibaca
+                            ? Icons.mark_email_read
+                            : Icons.mark_email_unread,
+                        color: sudahDibaca ? Colors.grey : Colors.redAccent,
                       ),
-                    ),
-                    subtitle: Text(item['pesan']),
-                    trailing: Text("${waktu.day}/${waktu.month}/${waktu.year}"),
-                  );
-                },
+                      title: Text(
+                        item['judul'] ?? 'Judul tidak tersedia',
+                        style: TextStyle(
+                          fontWeight:
+                              sudahDibaca ? FontWeight.normal : FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(item['pesan'] ?? 'Pesan kosong'),
+                      trailing: Text(DateFormat('dd MMM yyyy').format(waktu)),
+                      onTap: () async {
+                        if (!sudahDibaca) {
+                          await tandaiSudahDibaca(item['id_notifikasi']);
+                          setState(() {
+                            notifikasi[index]['dibaca'] = '1';
+                          });
+                          widget.onNotificationRead?.call();
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
     );
   }
