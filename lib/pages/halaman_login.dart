@@ -50,6 +50,7 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setString('noTelepon', user['no_telepon'].toString());
           await prefs.setString('email', user['email'].toString());
           await prefs.setString('role', user['role'].toString());
+          print('✅ ID yang disimpan: ${user['id_user']}');
 
           Navigator.pushReplacement(
             context,
