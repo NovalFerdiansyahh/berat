@@ -1,17 +1,9 @@
-import 'package:berat/pages/halaman_detail.dart';
-import 'package:berat/pages/halaman_komentar.dart';
-
-import 'package:berat/pages/halaman_favorit.dart';
 import 'package:berat/pages/halaman_login.dart';
-import 'package:berat/pages/halaman_pencarian.dart';
-import 'package:berat/pages/halaman_utama.dart';
+import 'package:berat/pages/splash_screen.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: LoginPage(), // halaman utama dengan  BottomNavigationBar
-    debugShowCheckedModeBanner: false,
-  ));
+void main(List<String> args) {
+  runApp(MyApp());
 }
 
 
@@ -22,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: SplashScreen(),
       theme: ThemeData(fontFamily: "Montserrat-Regular"),
     );
   }
