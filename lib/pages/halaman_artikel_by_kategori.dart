@@ -1,3 +1,4 @@
+import 'package:berat/pages/halaman_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -62,17 +63,34 @@ class _HalamanArtikelByKategoriState extends State<HalamanArtikelByKategori> {
                     leading:
                         artikel['gambar'] != null
                             ? Image.network(
-                              artikel['gambar'],
+                              artikel['gambar'].startsWith('http')
+                                  ? artikel['gambar']
+                                  : '$baseUrl/uploads/${artikel['gambar']}',
                               width: 80,
                               fit: BoxFit.cover,
                             )
-                            : null,
+                            : Container(
+                              width: 80,
+                              color: Colors.grey[300],
+                              child: Icon(Icons.image, size: 40),
+                            ),
                     title: Text(artikel['judul']),
                     subtitle: Text(
                       artikel['isi'],
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => HalamanDetail(
+                                idArtikel: int.parse(artikel['id_artikel']),
+                              ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),

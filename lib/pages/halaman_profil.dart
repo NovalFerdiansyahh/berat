@@ -2,6 +2,7 @@ import 'package:berat/pages/constanta.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'halaman_ubah_profil.dart';
+import 'halaman_login.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -61,8 +62,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.clear();
-                      Navigator.pop(context);
-                      Navigator.pop(context);
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                        (Route<dynamic> route) => false,
+                      );
                     },
                     child: Text('Ya'),
                     style: ElevatedButton.styleFrom(
@@ -116,12 +119,14 @@ class _ProfilePageState extends State<ProfilePage> {
             CircleAvatar(
               radius: 48,
               backgroundColor: Colors.grey[300],
-              backgroundImage: (fotoProfil != null && fotoProfil!.isNotEmpty)
-                  ? NetworkImage('$baseUrl/uploads/$fotoProfil')
-                  : null,
-              child: (fotoProfil == null || fotoProfil!.isEmpty)
-                  ? Icon(Icons.person, size: 48, color: Colors.grey[700])
-                  : null,
+              backgroundImage:
+                  (fotoProfil != null && fotoProfil!.isNotEmpty)
+                      ? NetworkImage('$baseUrl/uploads/$fotoProfil')
+                      : null,
+              child:
+                  (fotoProfil == null || fotoProfil!.isEmpty)
+                      ? Icon(Icons.person, size: 48, color: Colors.grey[700])
+                      : null,
             ),
 
             SizedBox(height: 12),
